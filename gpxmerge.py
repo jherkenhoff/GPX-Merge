@@ -49,25 +49,26 @@ statistics = {
 }
 
 for i, f in enumerate(file_list):
+    print("\nProcessing file %d of %d (%s)" %(i+1, len(file_list), f), end='')
     gpxFile = open(f)
     gpx = gpxpy.parse(gpxFile)
 
 
     point_count = gpx.get_points_no()
     track_length = gpx.length_2d()
-    print("Processing file %d of %d (%s) (%d points)" %(i, len(file_list), f, point_count))
+    print(" (%d points)" %(point_count), end='')
 
     statistics["total_point_count"] = statistics["total_point_count"] + point_count
     if args.minimum_point_count:
         if point_count < args.minimum_point_count:
-            print("Ignoring file %s (Point count %d < %d)" %(f, point_count, args.minimum_point_count))
+            print("\nIgnoring file %s (Point count %d < %d)" %(f, point_count, args.minimum_point_count), end='')
             statistics["ignored_files"]["point_count"] = statistics["ignored_files"]["point_count"] + 1
             continue
 
     statistics["total_length"] = statistics["total_length"] + track_length
     if args.minimum_length:
         if track_length < args.minimum_length:
-            print("Ignoring file %s (Track length %.2fm < %.2fm)" %(f, track_length, args.minimum_length))
+            print("\nIgnoring file %s (Track length %.2fm < %.2fm)" %(f, track_length, args.minimum_length), end='')
             statistics["ignored_files"]["track_length"] = statistics["ignored_files"]["track_length"] + 1
             continue
     for track_idx, track in enumerate(gpx.tracks):
@@ -85,6 +86,7 @@ for i, f in enumerate(file_list):
                         split_track_segments.append(segment_2)
 
             if (len(split_track_segments) > 0):
+                print(" (%d splits)" %(len(split_track_segments)-1), end='')
                 statistics["split_tracks"] = statistics["split_tracks"] + 1
                 statistics["split_count"] = statistics["split_count"] + len(split_track_segments)
                 for i in split_track_segments:
@@ -95,7 +97,7 @@ for i, f in enumerate(file_list):
             merged_gpx.tracks.append(track)
     gpxFile.close()
 
-print('Merging done. Writing to file \'%s\'' %args.merged[0])
+print('\n\nMerging done. Writing to file \'%s\'' %args.merged[0])
 merged_file = open(args.merged[0], "w")
 merged_file.write(merged_gpx.to_xml())
 merged_file.close()
